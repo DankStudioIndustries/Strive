@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strive - Modern Roblox Executor</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#FF0000',secondary:'#121212'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+background-color: #0A0A0A;
+font-family: 'Inter', sans-serif;
+color: #E0E0E0;
+overflow-x: hidden;
+}
+.neon-glow {
+text-shadow: 0 0 10px rgba(255, 0, 0, 0.7),
+0 0 20px rgba(255, 0, 0, 0.5),
+0 0 30px rgba(255, 0, 0, 0.3);
+}
+.logo-text {
+background: linear-gradient(135deg, #FF0000 0%, #FF4444 100%);
+-webkit-background-clip: text;
+background-clip: text;
+color: transparent;
+font-weight: 700;
+letter-spacing: 1px;
+position: relative;
+}
+.logo-text::after {
+content: '';
+position: absolute;
+top: 50%;
+right: -15px;
+width: 2px;
+height: 70%;
+background: #FF0000;
+transform: translateY(-50%) rotate(15deg);
+}
+.neon-box {
+box-shadow: 0 0 10px rgba(0, 247, 255, 0.3),
+0 0 20px rgba(0, 247, 255, 0.2);
+}
+.neon-border {
+border: 1px solid rgba(0, 247, 255, 0.5);
+box-shadow: 0 0 5px rgba(0, 247, 255, 0.3),
+inset 0 0 5px rgba(0, 247, 255, 0.2);
+}
+.glass-effect {
+background: rgba(18, 18, 18, 0.7);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.btn-hover {
+transition: all 0.3s ease;
+}
+.btn-hover:hover {
+transform: translateY(-2px);
+box-shadow: 0 0 15px rgba(0, 247, 255, 0.5);
+}
+.btn-pulse {
+animation: pulse 2s infinite;
+}
+@keyframes pulse {
+0% {
+box-shadow: 0 0 0 0 rgba(0, 247, 255, 0.7);
+}
+70% {
+box-shadow: 0 0 0 10px rgba(0, 247, 255, 0);
+}
+100% {
+box-shadow: 0 0 0 0 rgba(0, 247, 255, 0);
+}
+}
+.floating {
+animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+0% {
+transform: translateY(0px);
+}
+50% {
+transform: translateY(-10px);
+}
+100% {
+transform: translateY(0px);
+}
+}
+.rotate-slow {
+animation: rotate 10s linear infinite;
+}
+@keyframes rotate {
+from {
+transform: rotate(0deg);
+}
+to {
+transform: rotate(360deg);
+}
+}
+.ripple {
+position: relative;
+overflow: hidden;
+}
+.ripple:after {
+content: "";
+display: block;
+position: absolute;
+width: 100%;
+height: 100%;
+top: 0;
+left: 0;
+pointer-events: none;
+background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+background-repeat: no-repeat;
+background-position: 50%;
+transform: scale(10, 10);
+opacity: 0;
+transition: transform .5s, opacity 1s;
+}
+.ripple:active:after {
+transform: scale(0, 0);
+opacity: .3;
+transition: 0s;
+}
+.code-editor {
+font-family: 'Consolas', 'Monaco', monospace;
+tab-size: 4;
+white-space: pre;
+line-height: 1.5;
+overflow-x: auto;
+}
+::-webkit-scrollbar {
+width: 8px;
+height: 8px;
+}
+::-webkit-scrollbar-track {
+background: #121212;
+}
+::-webkit-scrollbar-thumb {
+background: #333;
+border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+background: rgba(0, 247, 255, 0.5);
+}
+.discord-btn:hover .discord-icon {
+animation: bounce 0.5s ease infinite alternate;
+}
+@keyframes bounce {
+from {
+transform: translateY(0);
+}
+to {
+transform: translateY(-5px);
+}
+}
+.script-item:hover {
+background: rgba(0, 247, 255, 0.1);
+border-left: 2px solid #00F7FF;
+}
+.particles {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: -1;
+}
+</style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<header class="w-full py-4 px-6 flex items-center justify-between glass-effect sticky top-0 z-50">
+<div class="flex items-center">
+<h1 class="text-3xl font-['Pacifico'] logo-text">Strive</h1>
+</div>
+<nav class="hidden md:flex items-center space-x-8">
+<a href="#" class="text-white hover:text-primary transition-colors duration-300">Home</a>
+<a href="#features" class="text-white hover:text-primary transition-colors duration-300">Features</a>
+<a href="#scripts" class="text-white hover:text-primary transition-colors duration-300">Scripts</a>
+<a href="#faq" class="text-white hover:text-primary transition-colors duration-300">FAQ</a>
+</nav>
+<div class="flex items-center space-x-4">
+<a href="https://discord.gg/9duAAAAmsd" target="_blank" class="discord-btn flex items-center space-x-2 bg-[#5865F2] hover:bg-[#4752C4] text-white py-2 px-4 rounded-button transition-all duration-300 btn-hover ripple !rounded-button whitespace-nowrap">
+<div class="w-5 h-5 flex items-center justify-center discord-icon">
+<i class="ri-discord-fill ri-lg"></i>
+</div>
+<span>Join Discord</span>
+</a>
+<button class="md:hidden w-10 h-10 flex items-center justify-center text-white" id="mobile-menu-button">
+<i class="ri-menu-line ri-2x"></i>
+</button>
+</div>
+</header>
+<div class="mobile-menu hidden w-full glass-effect py-4 px-6 absolute z-40" id="mobile-menu">
+<nav class="flex flex-col space-y-4">
+<a href="#" class="text-white hover:text-primary transition-colors duration-300">Home</a>
+<a href="#features" class="text-white hover:text-primary transition-colors duration-300">Features</a>
+<a href="#scripts" class="text-white hover:text-primary transition-colors duration-300">Scripts</a>
+<a href="#faq" class="text-white hover:text-primary transition-colors duration-300">FAQ</a>
+<a href="https://discord.gg/9duAAAAmsd" target="_blank" class="flex items-center space-x-2 text-white hover:text-primary transition-colors duration-300">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-discord-fill"></i>
+</div>
+<span>Join Discord</span>
+</a>
+</nav>
+</div>
+<main class="container mx-auto px-4 py-8">
+<section class="flex flex-col md:flex-row items-center justify-between py-16">
+<div class="md:w-1/2 mb-10 md:mb-0">
+<h2 class="text-4xl md:text-5xl font-bold mb-4 text-white neon-glow">Elevate Your <span class="text-primary">Roblox</span> Experience</h2>
+<p class="text-lg mb-8 text-gray-300">Strive is the most powerful and reliable Roblox executor, designed with performance and security in mind. Execute any script with ease and unlock limitless possibilities.</p>
+<div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+<button class="bg-primary hover:bg-opacity-80 text-black font-semibold py-3 px-6 rounded-button btn-pulse ripple !rounded-button whitespace-nowrap">
+Download Now
+</button>
+<a href="#features" class="bg-transparent border border-primary text-primary hover:bg-primary hover:bg-opacity-10 font-semibold py-3 px-6 rounded-button transition-all duration-300 btn-hover ripple !rounded-button whitespace-nowrap">
+Learn More
+</a>
+</div>
+</div>
+<div class="md:w-1/2 floating">
+<div class="relative">
+<div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-blue-600 rounded-lg blur opacity-30"></div>
+<div class="glass-effect rounded-lg p-6 relative">
+<div class="flex items-center justify-between mb-4">
+<div class="flex space-x-2">
+<div class="w-3 h-3 rounded-full bg-red-500"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+<div class="w-3 h-3 rounded-full bg-green-500"></div>
+</div>
+<div class="text-xs text-gray-400">Strive v2.5.1</div>
+</div>
+<div class="bg-[#121212] rounded-md p-4 neon-border mb-4">
+<pre class="code-editor text-sm text-gray-300">
+<span class="text-blue-400">local</span> <span class="text-green-400">Strive</span> = <span class="text-yellow-400">require</span>(<span class="text-red-400">"Strive"</span>)
+<span class="text-blue-400">function</span> <span class="text-green-400">executeScript</span>()
+<span class="text-green-400">Strive</span>:<span class="text-yellow-400">Init</span>()
+<span class="text-green-400">Strive</span>:<span class="text-yellow-400">SetLevel</span>(<span class="text-purple-400">5</span>)
+<span class="text-green-400">Strive</span>:<span class="text-yellow-400">Execute</span>(<span class="text-red-400">"print('Hello from Strive!')"</span>)
+<span class="text-blue-400">return</span> <span class="text-green-400">Strive</span>:<span class="text-yellow-400">GetStatus</span>()
+<span class="text-blue-400">end</span>
+<span class="text-gray-500">-- Execute the function</span>
+<span class="text-blue-400">local</span> <span class="text-green-400">status</span> = <span class="text-green-400">executeScript</span>()
+<span class="text-yellow-400">print</span>(<span class="text-red-400">"Execution status: "</span> .. <span class="text-green-400">status</span>)
+</pre>
+</div>
+<div class="flex space-x-3">
+<button class="bg-primary hover:bg-opacity-80 text-black font-semibold py-2 px-4 rounded-button ripple !rounded-button whitespace-nowrap">
+Execute
+</button>
+<button class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-button ripple !rounded-button whitespace-nowrap">
+Clear
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="features" class="py-16">
+<h2 class="text-3xl font-bold mb-12 text-center text-white">Why Choose <span class="text-primary neon-glow">Strive</span></h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="glass-effect rounded-lg p-6 transition-all duration-300 hover:transform hover:scale-105">
+<div class="w-14 h-14 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-shield-flash-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-white">Undetectable</h3>
+<p class="text-gray-400">Our advanced bypassing technology ensures you stay under the radar. Strive uses proprietary methods to avoid detection.</p>
+</div>
+<div class="glass-effect rounded-lg p-6 transition-all duration-300 hover:transform hover:scale-105">
+<div class="w-14 h-14 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-flashlight-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-white">Lightning Fast</h3>
+<p class="text-gray-400">Experience minimal latency with our optimized execution engine. Scripts run smoothly without affecting your gameplay.</p>
+</div>
+<div class="glass-effect rounded-lg p-6 transition-all duration-300 hover:transform hover:scale-105">
+<div class="w-14 h-14 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-code-box-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-white">Script Library</h3>
+<p class="text-gray-400">Access our extensive collection of pre-made scripts for popular games. New scripts added daily by our dedicated team.</p>
+</div>
+<div class="glass-effect rounded-lg p-6 transition-all duration-300 hover:transform hover:scale-105">
+<div class="w-14 h-14 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-refresh-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-white">Auto Updates</h3>
+<p class="text-gray-400">Never worry about outdated software. Strive automatically updates to stay compatible with the latest Roblox versions.</p>
+</div>
+<div class="glass-effect rounded-lg p-6 transition-all duration-300 hover:transform hover:scale-105">
+<div class="w-14 h-14 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-user-settings-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-white">Customizable UI</h3>
+<p class="text-gray-400">Personalize your experience with our fully customizable interface. Choose themes, layouts, and hotkeys that work for you.</p>
+</div>
+<div class="glass-effect rounded-lg p-6 transition-all duration-300 hover:transform hover:scale-105">
+<div class="w-14 h-14 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-customer-service-2-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-white">24/7 Support</h3>
+<p class="text-gray-400">Our dedicated support team is always available to help with any issues. Join our Discord community for instant assistance.</p>
+</div>
+</div>
+</section>
+<section class="py-16">
+<div class="glass-effect rounded-lg p-8 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary opacity-10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+<div class="flex flex-col md:flex-row items-center justify-between relative z-10">
+<div class="md:w-2/3 mb-8 md:mb-0">
+<h2 class="text-3xl font-bold mb-4 text-white">Ready to Transform Your Gameplay?</h2>
+<p class="text-gray-300">Join thousands of satisfied users who have elevated their Roblox experience with Strive.</p>
+</div>
+<div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+<button class="bg-primary hover:bg-opacity-80 text-black font-semibold py-3 px-6 rounded-button btn-pulse ripple !rounded-button whitespace-nowrap">
+Download Now
+</button>
+<a href="https://discord.gg/9duAAAAmsd" target="_blank" class="discord-btn flex items-center justify-center space-x-2 bg-[#5865F2] hover:bg-[#4752C4] text-white py-3 px-6 rounded-button transition-all duration-300 btn-hover ripple !rounded-button whitespace-nowrap">
+<div class="w-5 h-5 flex items-center justify-center discord-icon">
+<i class="ri-discord-fill"></i>
+</div>
+<span>Join Community</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<section id="scripts" class="py-16">
+<h2 class="text-3xl font-bold mb-12 text-center text-white">Popular <span class="text-primary neon-glow">Scripts</span></h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="glass-effect rounded-lg overflow-hidden">
+<div class="p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">Script Library</h3>
+<p class="text-gray-400 mb-4">Browse our collection of verified scripts for popular Roblox games.</p>
+<div class="bg-[#121212] rounded-md h-64 overflow-y-auto neon-border">
+<div class="script-item p-3 border-l-2 border-transparent transition-all duration-200">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-white font-medium">Blox Fruits Auto Farm</h4>
+<p class="text-xs text-gray-500">Updated: June 2, 2025</p>
+</div>
+<button class="bg-primary bg-opacity-20 hover:bg-opacity-30 text-primary text-sm py-1 px-3 rounded-button transition-colors !rounded-button whitespace-nowrap">
+Load
+</button>
+</div>
+</div>
+<div class="script-item p-3 border-l-2 border-transparent transition-all duration-200">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-white font-medium">Adopt Me Pet Simulator</h4>
+<p class="text-xs text-gray-500">Updated: June 1, 2025</p>
+</div>
+<button class="bg-primary bg-opacity-20 hover:bg-opacity-30 text-primary text-sm py-1 px-3 rounded-button transition-colors !rounded-button whitespace-nowrap">
+Load
+</button>
+</div>
+</div>
+<div class="script-item p-3 border-l-2 border-transparent transition-all duration-200">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-white font-medium">Phantom Forces Aimbot</h4>
+<p class="text-xs text-gray-500">Updated: May 30, 2025</p>
+</div>
+<button class="bg-primary bg-opacity-20 hover:bg-opacity-30 text-primary text-sm py-1 px-3 rounded-button transition-colors !rounded-button whitespace-nowrap">
+Load
+</button>
+</div>
+</div>
+<div class="script-item p-3 border-l-2 border-transparent transition-all duration-200">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-white font-medium">Jailbreak Auto Rob</h4>
+<p class="text-xs text-gray-500">Updated: May 28, 2025</p>
+</div>
+<button class="bg-primary bg-opacity-20 hover:bg-opacity-30 text-primary text-sm py-1 px-3 rounded-button transition-colors !rounded-button whitespace-nowrap">
+Load
+</button>
+</div>
+</div>
+<div class="script-item p-3 border-l-2 border-transparent transition-all duration-200">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-white font-medium">Bee Swarm Simulator</h4>
+<p class="text-xs text-gray-500">Updated: May 25, 2025</p>
+</div>
+<button class="bg-primary bg-opacity-20 hover:bg-opacity-30 text-primary text-sm py-1 px-3 rounded-button transition-colors !rounded-button whitespace-nowrap">
+Load
+</button>
+</div>
+</div>
+<div class="script-item p-3 border-l-2 border-transparent transition-all duration-200">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-white font-medium">Arsenal Silent Aim</h4>
+<p class="text-xs text-gray-500">Updated: May 22, 2025</p>
+</div>
+<button class="bg-primary bg-opacity-20 hover:bg-opacity-30 text-primary text-sm py-1 px-3 rounded-button transition-colors !rounded-button whitespace-nowrap">
+Load
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="glass-effect rounded-lg overflow-hidden">
+<div class="p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">Script Editor</h3>
+<p class="text-gray-400 mb-4">Write or paste your own custom scripts to execute.</p>
+<div class="bg-[#121212] rounded-md p-4 neon-border mb-4">
+<textarea class="w-full h-48 bg-transparent text-gray-300 code-editor focus:outline-none resize-none" placeholder="-- Enter your script here"></textarea>
+</div>
+<div class="flex space-x-3">
+<button class="bg-primary hover:bg-opacity-80 text-black font-semibold py-2 px-4 rounded-button ripple !rounded-button whitespace-nowrap">
+Execute
+</button>
+<button class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-button ripple !rounded-button whitespace-nowrap">
+Clear
+</button>
+<button class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-button ripple !rounded-button whitespace-nowrap">
+Save
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="faq" class="py-16">
+<h2 class="text-3xl font-bold mb-12 text-center text-white">Frequently Asked <span class="text-primary neon-glow">Questions</span></h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="glass-effect rounded-lg p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">Is Strive safe to use?</h3>
+<p class="text-gray-400">Absolutely. Strive is developed with security as a top priority. Our executor is regularly updated to stay undetected by Roblox's anti-cheat system. We also scan all scripts in our library to ensure they're free from malicious code.</p>
+</div>
+<div class="glass-effect rounded-lg p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">Will I get banned for using Strive?</h3>
+<p class="text-gray-400">While we implement advanced bypassing methods to minimize detection risk, we recommend using scripts responsibly. Avoid using obvious cheats in public servers and be mindful of other players' experiences.</p>
+</div>
+<div class="glass-effect rounded-lg p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">How often is Strive updated?</h3>
+<p class="text-gray-400">We release updates weekly to ensure compatibility with the latest Roblox versions. After major Roblox updates, we typically push emergency updates within 24 hours to keep Strive functioning properly.</p>
+</div>
+<div class="glass-effect rounded-lg p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">Does Strive work on all devices?</h3>
+<p class="text-gray-400">Strive is compatible with Windows 10 and 11. We currently don't support Mac, mobile devices, or consoles due to technical limitations. We recommend at least 4GB of RAM and a modern processor for optimal performance.</p>
+</div>
+<div class="glass-effect rounded-lg p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">Can I request specific scripts?</h3>
+<p class="text-gray-400">Yes! Join our Discord community to request scripts for your favorite games. Our developers regularly take requests and prioritize popular games. Premium members receive priority for script requests.</p>
+</div>
+<div class="glass-effect rounded-lg p-6">
+<h3 class="text-xl font-semibold mb-3 text-white">Is there a premium version?</h3>
+<p class="text-gray-400">Yes, Strive Premium offers additional features like exclusive scripts, faster execution, priority support, and early access to updates. Visit our Discord server for more information on pricing and benefits.</p>
+</div>
+</div>
+</section>
+<section class="py-16">
+<div class="glass-effect rounded-lg p-8 relative overflow-hidden">
+<div class="absolute bottom-0 left-0 w-64 h-64 bg-primary opacity-10 rounded-full blur-3xl -ml-32 -mb-32"></div>
+<div class="text-center relative z-10">
+<h2 class="text-3xl font-bold mb-6 text-white">Join Our <span class="text-primary neon-glow">Community</span></h2>
+<p class="text-gray-300 mb-8 max-w-2xl mx-auto">Connect with thousands of Strive users, share scripts, get help, and stay updated on the latest features and updates.</p>
+<a href="https://discord.gg/9duAAAAmsd" target="_blank" class="discord-btn inline-flex items-center space-x-3 bg-[#5865F2] hover:bg-[#4752C4] text-white py-3 px-8 rounded-button transition-all duration-300 btn-hover ripple !rounded-button whitespace-nowrap">
+<div class="w-6 h-6 flex items-center justify-center discord-icon">
+<i class="ri-discord-fill ri-lg"></i>
+</div>
+<span class="text-lg font-semibold">Join Our Discord Server</span>
+</a>
+</div>
+</div>
+</section>
+</main>
+<footer class="bg-[#0F0F0F] py-12 px-6">
+<div class="container mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-center mb-8">
+<div class="mb-6 md:mb-0">
+<h1 class="text-3xl font-['Pacifico'] logo-text mb-2">Strive</h1>
+<p class="text-gray-400">Elevate your Roblox experience</p>
+</div>
+<div class="flex space-x-6">
+<a href="https://discord.gg/9duAAAAmsd" target="_blank" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
+<i class="ri-discord-fill text-white"></i>
+</a>
+<a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
+<i class="ri-twitter-x-fill text-white"></i>
+</a>
+<a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
+<i class="ri-youtube-fill text-white"></i>
+</a>
+<a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
+<i class="ri-github-fill text-white"></i>
+</a>
+</div>
+</div>
+<div class="border-t border-gray-800 pt-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<div>
+<h3 class="text-white font-semibold mb-4">Product</h3>
+<ul class="space-y-2">
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Download</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Features</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Premium</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Changelog</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-white font-semibold mb-4">Resources</h3>
+<ul class="space-y-2">
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Documentation</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Script Library</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Tutorials</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">API Reference</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-white font-semibold mb-4">Community</h3>
+<ul class="space-y-2">
+<li><a href="https://discord.gg/9duAAAAmsd" class="text-gray-400 hover:text-primary transition-colors">Discord</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Forums</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Events</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Contribute</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-white font-semibold mb-4">Legal</h3>
+<ul class="space-y-2">
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Terms of Service</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Privacy Policy</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Cookie Policy</a></li>
+<li><a href="#" class="text-gray-400 hover:text-primary transition-colors">DMCA</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+<p class="text-gray-500 text-sm mb-4 md:mb-0">© 2025 Strive. All rights reserved. Not affiliated with Roblox Corporation.</p>
+<p class="text-gray-500 text-sm">Version 2.5.1 | Last updated: June 4, 2025</p>
+</div>
+</div>
+</footer>
+<script id="mobile-menu-script">
+document.addEventListener('DOMContentLoaded', function() {
+const mobileMenuButton = document.getElementById('mobile-menu-button');
+const mobileMenu = document.getElementById('mobile-menu');
+mobileMenuButton.addEventListener('click', function() {
+mobileMenu.classList.toggle('hidden');
+});
+// Close mobile menu when clicking on a link
+const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+mobileMenuLinks.forEach(link => {
+link.addEventListener('click', function() {
+mobileMenu.classList.add('hidden');
+});
+});
+});
+</script>
+<script id="particle-animation-script">
+document.addEventListener('DOMContentLoaded', function() {
+const particlesContainer = document.getElementById('particles');
+// Create particles
+for (let i = 0; i < 50; i++) {
+const particle = document.createElement('div');
+particle.style.position = 'absolute';
+particle.style.width = `${Math.random() * 3 + 1}px`;
+particle.style.height = particle.style.width;
+particle.style.backgroundColor = 'rgba(0, 247, 255, 0.5)';
+particle.style.borderRadius = '50%';
+particle.style.top = `${Math.random() * 100}%`;
+particle.style.left = `${Math.random() * 100}%`;
+particle.style.opacity = Math.random() * 0.5;
+particle.style.boxShadow = '0 0 10px rgba(0, 247, 255, 0.5)';
+// Set animation
+const duration = Math.random() * 20 + 10;
+const delay = Math.random() * 10;
+particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+particlesContainer.appendChild(particle);
+}
+});
+</script>
+<script id="ripple-effect-script">
+document.addEventListener('DOMContentLoaded', function() {
+const rippleButtons = document.querySelectorAll('.ripple');
+rippleButtons.forEach(button => {
+button.addEventListener('click', function(e) {
+const rect = button.getBoundingClientRect();
+const x = e.clientX - rect.left;
+const y = e.clientY - rect.top;
+const circle = document.createElement('span');
+circle.style.position = 'absolute';
+circle.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+circle.style.borderRadius = '50%';
+circle.style.width = '1px';
+circle.style.height = '1px';
+circle.style.top = `${y}px`;
+circle.style.left = `${x}px`;
+circle.style.transform = 'scale(0)';
+circle.style.animation = 'ripple 0.6s linear';
+button.appendChild(circle);
+setTimeout(() => {
+circle.remove();
+}, 600);
+});
+});
+});
+// Add ripple animation
+const style = document.createElement('style');
+style.textContent = `
+@keyframes ripple {
+to {
+transform: scale(100);
+opacity: 0;
+}
+}
+`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
